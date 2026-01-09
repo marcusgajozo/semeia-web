@@ -7,29 +7,11 @@ datasource db {
   provider = "postgresql"
 }
 
-enum SocialPlatform {
-  INSTAGRAM
-  FACEBOOK_PAGE
-  TIKTOK
-  LINKEDIN
-  YOUTUBE
-  EVOLUTION_API
-}
-
-enum PostStatus {
-  DRAFT
-  SCHEDULED
-  PUBLISHING
-  PUBLISHED
-  FAILED
-}
-
-enum MediaType {
-  IMAGE
-  VIDEO
-  CAROUSEL
-  REELS
-  STORY
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
 }
 
 model User {
@@ -42,63 +24,173 @@ model User {
   name         String
   passwordHash String @map("password_hash")
 
-  socialAccounts SocialAccount[]
-  refreshTokens  RefreshToken[]
+  memberId String? @unique
+  member   Member? @relation(fields: [memberId], references: [id])
+
+  church   Church? @relation(fields: [churchId], references: [id])
+  churchId String?
 
   @@map("users")
 }
 
-model RefreshToken {
+model Church {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  name   String
+  active Boolean @default(true)
+
+  users      User[]
+  members    Member[]
+  visitors   Visitor[]
+  ministries Ministry[]
+  songs      Song[]
+  services   Service[]
+
+  @@map("churches")
+}
+
+model Member {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  name        String
+  phone       String?
+  dateOfBirth DateTime @map("date_of_birth")
+  isBaptized  Boolean  @default(false) @map("is_baptized")
+
+  user User?
+
+  maritalStatus MaritalStatus @default(SINGLE) @map("marital_status")
+  weddingDate   DateTime?     @map("wedding_date")
+
+  spouseId String? @unique @map("spouse_id")
+  spouse   Member? @relation("SpouseRelation", fields: [spouseId], references: [id])
+  spouseOf Member? @relation("SpouseRelation")
+
+  churchId String
+  church   Church @relation(fields: [churchId], references: [id])
+
+  ministryMembers   MinistryMember[]
+  serviceVolunteers ServiceVolunteer[]
+
+  @@index([churchId])
+  @@map("members")
+}
+
+model Visitor {
   id        String   @id @default(uuid())
-  tokenHash String   @unique @map("token_hash")
-  expiresAt DateTime @map("expires_at")
   createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
-  userId String @map("user_id")
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  phone       String?
+  visitDate   DateTime @default(now()) @map("visit_date")
+  observation String?
 
-  @@map("refresh_tokens")
+  status VisitorStatus @default(NEW)
+
+  churchId String
+  church   Church @relation(fields: [churchId], references: [id])
+
+  @@index([churchId])
+  @@map("visitors")
 }
 
-model SocialAccount {
-  id        String    @id @default(uuid())
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
-
-  platform SocialPlatform
-
-  metadata Json
-
-  userId String @map("user_id")
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  publications Publication[]
-
-  @@unique([userId, platform, metadata])
-  @@map("social_accounts")
+enum VisitorStatus {
+  NEW
+  CONTACTED
+  FREQUENT
+  CONVERTED
 }
 
-model Publication {
-  id        String    @id @default(uuid())
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  deletedAt DateTime? @map("deleted_at")
+model Ministry {
+  id   String @id @default(uuid())
+  name String
 
-  caption   String?   @db.Text
-  mediaUrls String[]  @map("media_urls")
-  mediaType MediaType @map("media_type")
+  churchId String
+  church   Church @relation(fields: [churchId], references: [id])
 
-  scheduledAt DateTime  @map("scheduled_at")
-  publishedAt DateTime? @map("published_at")
+  members MinistryMember[]
 
-  status         PostStatus @default(DRAFT)
-  failureReason  String?    @map("failure_reason") @db.Text
-  externalPostId String?    @map("external_post_id")
+  @@map("ministries")
+}
 
-  socialAccountId String        @map("social_account_id")
-  socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+model MinistryMember {
+  id   String @id @default(uuid())
+  role String
 
-  @@index([status, scheduledAt])
-  @@map("publications")
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id])
+
+  ministryId String
+  ministry   Ministry @relation(fields: [ministryId], references: [id])
+
+  @@unique([memberId, ministryId, role])
+  @@map("ministry_members")
+}
+
+model Song {
+  id     String  @id @default(uuid())
+  title  String
+  artist String?
+  bpm    Int?
+  key    String?
+  link   String?
+  lyrics String? @db.Text
+
+  churchId String
+  church   Church @relation(fields: [churchId], references: [id])
+
+  services ServiceSong[]
+
+  @@map("songs")
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  date        DateTime
+  title       String
+  description String?
+
+  churchId String
+  church   Church @relation(fields: [churchId], references: [id])
+
+  team    ServiceVolunteer[]
+  setlist ServiceSong[]
+
+  @@map("services")
+}
+
+model ServiceVolunteer {
+  id        String  @id @default(uuid())
+  role      String 
+  confirmed Boolean @default(false)
+
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  memberId String
+  member   Member @relation(fields: [memberId], references: [id])
+
+  @@map("service_volunteers")
+}
+
+
+model ServiceSong {
+  id    String  @id @default(uuid())
+  order Int
+  key   String?
+
+  serviceId String
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  songId String
+  song   Song   @relation(fields: [songId], references: [id])
+
+  @@map("service_songs")
 }
