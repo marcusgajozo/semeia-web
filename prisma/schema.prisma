@@ -27,8 +27,8 @@ model User {
   memberId String? @unique
   member   Member? @relation(fields: [memberId], references: [id])
 
-  church   Church? @relation(fields: [churchId], references: [id])
   churchId String?
+  church   Church? @relation(fields: [churchId], references: [id])
 
   @@map("users")
 }
@@ -168,7 +168,7 @@ model Service {
 
 model ServiceVolunteer {
   id        String  @id @default(uuid())
-  role      String 
+  role      String
   confirmed Boolean @default(false)
 
   serviceId String
@@ -179,7 +179,6 @@ model ServiceVolunteer {
 
   @@map("service_volunteers")
 }
-
 
 model ServiceSong {
   id    String  @id @default(uuid())
