@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum SocialPlatform {
+  INSTAGRAM
+  FACEBOOK_PAGE
+  TIKTOK
+  LINKEDIN
+  YOUTUBE
+  EVOLUTION_API
+}
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  CAROUSEL
+  REELS
+  STORY
+}
+
+model User {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  email        String @unique
+  name         String
+  passwordHash String @map("password_hash")
+
+  socialAccounts SocialAccount[]
+  refreshTokens  RefreshToken[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+model SocialAccount {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  platform SocialPlatform
+
+  metadata Json
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  publications Publication[]
+
+  @@unique([userId, platform, metadata])
+  @@map("social_accounts")
+}
+
+model Publication {
+  id        String    @id @default(uuid())
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  caption   String?   @db.Text
+  mediaUrls String[]  @map("media_urls")
+  mediaType MediaType @map("media_type")
+
+  scheduledAt DateTime  @map("scheduled_at")
+  publishedAt DateTime? @map("published_at")
+
+  status         PostStatus @default(DRAFT)
+  failureReason  String?    @map("failure_reason") @db.Text
+  externalPostId String?    @map("external_post_id")
+
+  socialAccountId String        @map("social_account_id")
+  socialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
+
+  @@index([status, scheduledAt])
+  @@map("publications")
+}

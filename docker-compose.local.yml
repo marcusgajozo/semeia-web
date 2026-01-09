@@ -1,0 +1,29 @@
+services:
+  agendei-web:
+    container_name: agendei_web
+    build:
+      context: . 
+      dockerfile: Dockerfile  
+      target: local
+    ports:
+      - "${AGENDEI_WEB_PORT}:3000"
+    volumes:
+      - .:/agendei-web
+    depends_on:
+      - postgres-agendei-web
+    tty: true
+
+  postgres-agendei-web:
+    container_name: postgres_agendei_web
+    image: postgres:15-alpine
+    ports:
+      - "${DATABASE_PORT}:5432"
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - pg_data:/var/lib/postgresql/data 
+
+volumes:
+  pg_data:
