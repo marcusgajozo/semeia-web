@@ -1,9 +1,7 @@
-import type React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
+import type React from "react";
 import "./globals.css";
-import { AppSidebar } from "@/components/app-sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,10 +45,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
-        <AppSidebar />
-        <main className="lg:pl-64 min-h-screen">
-          <div className="p-6 lg:p-8 pt-20 lg:pt-8">{children}</div>
-        </main>
+        {children}
       </body>
     </html>
   );
