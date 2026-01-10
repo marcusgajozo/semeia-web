@@ -2,7 +2,6 @@ import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { globalErrorHandler } from "./common/errors/error-handler";
 import { authModule } from "./modules/auth/http/auth.routes";
-import { socialAccountModule } from "./modules/social-accounts/http/social-account.routes";
 
 const api = new OpenAPIHono().basePath("/api/v1");
 
@@ -26,6 +25,5 @@ api.get("/swagger", swaggerUI({ url: "/api/v1/doc" }));
 api.onError(globalErrorHandler);
 
 api.route("/", authModule);
-api.route("/", socialAccountModule);
 
 export { api };

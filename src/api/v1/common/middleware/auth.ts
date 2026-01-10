@@ -1,7 +1,7 @@
 import { createMiddleware } from "hono/factory";
 import { verify } from "hono/jwt";
 import { getCookie } from "hono/cookie";
-import { JWT_SECRET } from "@/lib/env";
+import { JWT_SECRET } from "@/constants/env";
 
 export const authMiddleware = createMiddleware(async (c, next) => {
   const secret = JWT_SECRET || "segredo_super_secreto";

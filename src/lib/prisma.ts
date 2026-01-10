@@ -1,4 +1,4 @@
-import { DATABASE_PRISMA_URL, NODE_ENV } from "@/lib/env";
+import { DATABASE_PRISMA_URL, NODE_ENV } from "@/constants/env";
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
