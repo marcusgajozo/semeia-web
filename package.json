@@ -12,7 +12,7 @@
     "docker:dev": "pnpm run docker:up -d && pnpm run docker:prisma:generate",
     "docker:db:update": "pnpm run docker:db:push && pnpm run docker:prisma:generate ",
     "docker:up": "docker compose -f docker-compose.local.yml up --build",
-    "docker:down": "docker compose -f docker-compose.local.yml down -v",
+    "docker:down": "docker compose -f docker-compose.local.yml down",
     "docker:db:migrate": "docker compose -f docker-compose.local.yml exec agendei-web npx prisma migrate dev",
     "docker:prisma:generate": "docker compose -f docker-compose.local.yml exec agendei-web npx prisma generate",
     "docker:db:push": "docker compose -f docker-compose.local.yml exec agendei-web npx prisma db push --force-reset",
