@@ -13,17 +13,28 @@ export async function signInAction(
   data: z.infer<typeof signInSchema>
 ): Promise<LoginState> {
   try {
-    await signIn("credentials", {
-      email: data.email,
-      password: data.password,
-      redirect: true,
-    });
+    try {
+      await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: true,
+        redirectTo: "/",
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+        throw error;
+      }
+
+      return {
+        error: "Email ou senha incorretos. Tente novamente.",
+      };
+    }
 
     return { success: true };
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Erro ao fazer login";
-    console.error("Sign in error:", errorMessage);
+    if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+      throw error;
+    }
 
     return {
       error: "Email ou senha incorretos. Tente novamente.",

@@ -32,13 +32,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           });
 
           if (!res.ok) {
-            const error = await res.text();
-            console.error("API Error:", res.status, error);
-            throw new Error("Invalid credentials.");
+            return null;
           }
 
           const data = await res.json();
-          console.log("Login successful, token received");
 
           const decoded = jwtDecode<{
             sub: string;
@@ -52,9 +49,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             name: decoded.name,
             accessToken: data.accessToken,
           };
-        } catch (error) {
-          console.error("Authorization error:", error);
-          throw new Error("Invalid credentials.");
+        } catch {
+          return null;
         }
       },
     }),
@@ -75,8 +71,5 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return session;
     },
-  },
-  pages: {
-    signIn: "/sign-in",
   },
 });
