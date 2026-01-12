@@ -1,43 +1,26 @@
 "use server";
 
-import { z } from "zod";
 import { signIn } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { z } from "zod";
 import { signInSchema } from "../_schemas/sign-in.schema";
 
-export type LoginState = {
+export type AuthState = {
   error?: string;
-  success?: boolean;
 };
 
 export async function signInAction(
   data: z.infer<typeof signInSchema>
-): Promise<LoginState> {
+): Promise<AuthState> {
   try {
-    try {
-      await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: true,
-        redirectTo: "/",
-      });
-    } catch (error) {
-      if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
-        throw error;
-      }
-
-      return {
-        error: "Email ou senha incorretos. Tente novamente.",
-      };
-    }
-
-    return { success: true };
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
-      throw error;
-    }
-
-    return {
-      error: "Email ou senha incorretos. Tente novamente.",
-    };
+    await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+  } catch {
+    return { error: "Falha ao fazer login. Verifique suas credenciais." };
   }
+
+  redirect("/");
 }

@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { signInSchema } from "../../_schemas/sign-in.schema";
@@ -14,24 +14,18 @@ import { signInAction } from "../../_actions/sign-in.action";
 
 export function FormSignIn() {
   const [error, setError] = useState<string | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, startTransition] = useTransition();
 
   const methods = useForm<z.input<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
   });
 
   const handleSubmit = methods.handleSubmit(async (data) => {
-    setError(undefined);
-    setIsLoading(true);
-
-    try {
+    startTransition(async () => {
+      setError(undefined);
       const result = await signInAction(data);
-      if (result?.error) {
-        setError(result.error);
-      }
-    } finally {
-      setIsLoading(false);
-    }
+      setError(result.error);
+    });
   });
 
   return (
