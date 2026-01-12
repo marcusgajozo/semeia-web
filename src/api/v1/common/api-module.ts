@@ -1,8 +1,8 @@
 import { OpenAPIHono, OpenAPIHonoOptions } from "@hono/zod-openapi";
-import { TAppBindings } from "./schemas/app-variables.schema";
+import { AppBindings } from "./schemas/app-variables.schema";
 
-export class ApiModule extends OpenAPIHono<TAppBindings> {
-  constructor(options?: OpenAPIHonoOptions<TAppBindings>) {
+export class ApiModule extends OpenAPIHono<AppBindings> {
+  constructor(options?: OpenAPIHonoOptions<AppBindings>) {
     super({
       ...options,
       defaultHook: (result, c) => {
