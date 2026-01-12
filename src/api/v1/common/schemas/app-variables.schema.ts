@@ -9,4 +9,4 @@ const appBindingsSchema = z.object({
   }),
 });
 
-export type TAppBindings = z.infer<typeof appBindingsSchema>;
+export type AppBindings = z.infer<typeof appBindingsSchema>;
